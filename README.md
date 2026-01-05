@@ -12,4 +12,4 @@ To provide Indian families with a unified view of their financial health.
 - Node.js
 
 ## Status
-Phase 0 – Project Setup
+Phase 1 – Core functionality development
