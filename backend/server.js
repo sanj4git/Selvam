@@ -1,7 +1,7 @@
-
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes.js';
 
 
 dotenv.config();    // load .env variables
@@ -11,9 +11,11 @@ const app = express();
 // Middleware to parse JSON coming in
 app.use(express.json());
 
+// Register Route
+app.use("/api/auth", authRoutes);
+
 // Mongo Connection
 mongoose.connect(process.env.MONGO_URI)
-
 .then(() => console.log("Mongo DB Connected Successfully!"))
 .catch((err) => console.error("MongoDB Connection error : ", err));
 
