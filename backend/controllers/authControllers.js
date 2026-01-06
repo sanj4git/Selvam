@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -54,7 +55,52 @@ export const registerUser = async (req, res) => {
         res.status(500).json({
             message : "Server Error",
         });
+    }
+};
+
+
+// @desc    Login existing user
+// @route   POST /api/auth/login
+// @access  Public
+export const loginUser = async (req, res) => {
+
+    try{
+
+        const { email, password } = req.body;
+
+        // Check if User Exists
+        const user = await User.findOne({ email });
+        if(!user){
+            return res.status(400).json({ message : "Invalid Email / Password" });
+        }
+
+        // Check Password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(!isMatch){
+            return res.status(400).json({ message : "Invalid Password" });
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            { id : user._id },
+            process.env.JWT_SECRET,
+            { expiresIn : "7d" }
+        );
+
+        // Send success response
+        res.status(200).json({
+            _id : user._id,
+            name : user.name,
+            email : user.email,
+            token,
+        });
+
+    } catch(error){
+
+        console.log(error);
+        res.status(500).json({
+            message : "Server Error",
+        });
 
     }
-
 };
