@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
-
+import assetRoutes from "./routes/assetRoutes.js";
 
 dotenv.config();    // load .env variables
 
@@ -13,6 +13,9 @@ app.use(express.json());
 
 // Register Route
 app.use("/api/auth", authRoutes);
+
+// Asset Routes
+app.use("/api/assets", assetRoutes);
 
 // Mongo Connection
 mongoose.connect(process.env.MONGO_URI)
