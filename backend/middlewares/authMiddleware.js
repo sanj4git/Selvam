@@ -5,39 +5,41 @@ import User from "../models/User.js";
   Auth Middleware
   ---------------
   Protects routes by verifying JWT token.
-  If valid, attaches user ID to req.user.
+  If valid, attaches the logged-in user object to req.user.
 */
 
 const protect = async (req, res, next) => {
   let token;
 
-  // 1️⃣ Check if Authorization header exists
+  // Check for Authorization header and Bearer token
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     try {
-      // 2️⃣ Extract token from "Bearer <token>"
+      // Extract token from header
       token = req.headers.authorization.split(" ")[1];
 
-      // 3️⃣ Verify token
+      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // 4️⃣ Attach user ID to request object
-      // (exclude password for safety)
-      req.user = decoded.id;
+      // Fetch user from DB and attach to request (exclude password)
+      req.user = await User.findById(decoded.id).select("-password");
 
-      // 5️⃣ Move to next middleware/controller
+      // If user no longer exists
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      // Proceed to next middleware / controller
       next();
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: "Not authorized, token failed" });
+      return res.status(401).json({ message: "Not authorized, token failed" });
     }
-  }
-
-  // 6️⃣ No token found
-  if (!token) {
-    res.status(401).json({ message: "Not authorized, no token" });
+  } else {
+    // No token in header
+    return res.status(401).json({ message: "Not authorized, no token" });
   }
 };
 
