@@ -1,52 +1,28 @@
 import express from "express";
-
-// Import expense controller functions
+import protect from "../middlewares/authMiddleware.js";
 import {
-    addExpense,
-    getExpenses,
-    updateExpense,
-    deleteExpense,
+  validateCreateExpense,
+  validateUpdateExpense,
+} from "../middlewares/expenseValidation.js";
+import {
+  addExpense,
+  getExpenses,
+  updateExpense,
+  deleteExpense,
 } from "../controllers/expenseController.js";
-
-// Import auth middleware to protect routes
-import protect  from "../middlewares/authMiddleware.js";
-import { validateExpense } from "../middlewares/expenseValidation.js";
 
 const router = express.Router();
 
-/*
-  Expense Routes
-  --------------
-  All routes are protected.
-  Only authenticated users can access their own expenses.
-*/
+// CREATE expense → strict validation
+router.post("/", protect, validateCreateExpense, addExpense);
 
-/*
-  @route   POST /expenses
-  @desc    Add a new expense
-  @access  Private
-*/
-router.post("/", protect, validateExpense, addExpense); 
-
-/*
-  @route   GET /expenses
-  @desc    Get all expenses of logged-in user
-  @access  Private
-*/
+// READ expenses
 router.get("/", protect, getExpenses);
 
-/*
-  @route   PUT /expenses/:id
-  @desc    Update a specific expense
-  @access  Private
-*/
-router.put("/:id", protect, validateExpense ,updateExpense);
+// UPDATE expense → flexible validation
+router.put("/:id", protect, validateUpdateExpense, updateExpense);
 
-/*
-  @route   DELETE /expenses/:id
-  @desc    Delete a specific expense
-  @access  Private
-*/
+// DELETE expense
 router.delete("/:id", protect, deleteExpense);
 
 export default router;
