@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import assetRoutes from "./routes/assetRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import liabilityRoutes from "./routes/liabilityRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 dotenv.config();    // load .env variables
 
@@ -22,7 +23,10 @@ app.use("/api/assets", assetRoutes);
 app.use("/api/expenses",expenseRoutes);
 
 //Liability Routes
-app.use("/liabilities", liabilityRoutes);
+app.use("/api/liabilities", liabilityRoutes);
+
+//Dashboard Routes
+app.use("/api/dashboard", dashboardRoutes);
 
 // Mongo Connection
 mongoose.connect(process.env.MONGO_URI)
