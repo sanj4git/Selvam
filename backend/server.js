@@ -6,10 +6,17 @@ import assetRoutes from "./routes/assetRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import liabilityRoutes from "./routes/liabilityRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import cors from 'cors';
+
 
 dotenv.config();    // load .env variables
 
 const app = express();
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 
 // Middleware to parse JSON coming in
 app.use(express.json());
