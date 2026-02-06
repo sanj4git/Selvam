@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import assetRoutes from "./routes/assetRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
+import liabilityRoutes from "./routes/liabilityRoutes.js";
 
 dotenv.config();    // load .env variables
 
@@ -19,6 +20,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/assets", assetRoutes);
 
 app.use("/api/expenses",expenseRoutes);
+
+//Liability Routes
+app.use("/liabilities", liabilityRoutes);
 
 // Mongo Connection
 mongoose.connect(process.env.MONGO_URI)
