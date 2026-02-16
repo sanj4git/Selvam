@@ -1,20 +1,20 @@
-# Phase 2: Automation, Analytics & UI Overhaul
+# Phase 2: Analytics Integration & Automation
 
-## 1. Frontend "Glow-up" (UI/UX)
-* **Dashboard Visuals:** Integrate `Recharts` to show Net Worth trends and Expense donuts.
-* **Dark Mode / Glassmorphism:** Enhance `index.css` with better depth and micro-interactions.
-* **Empty States:** Add professional illustrations for "No Data Found" scenarios.
-* **Toast Notifications:** Replace basic alerts with `react-toastify` for success/error feedback.
+## 1. Dashboard Integration (URGENT)
+* **Frontend Connection:** Create `Dashboard.jsx` to fetch data from `/api/dashboard/summary` and `/api/dashboard/expenses`.
+* **Net Worth Display:** Implement a "Financial Snapshot" section showing Total Assets, Total Liabilities, and Net Worth.
+* **Data Visualization:** Use `Recharts` to turn the backend's `byCategory` and `byMonth` data into Pie and Line charts.
 
-## 2. API Automations (India-Centric)
-* **Gold/Silver Prices:** Integrate a live Metal Price API to auto-update gold asset values.
-* **Mutual Fund NAV:** Use RapidAPI or similar to fetch daily NAV for MF holdings.
-* **Stock Market Integration:** Basic tracking for NSE/BSE stock prices.
-* **Scheduled Jobs:** Implement `node-cron` on the backend to refresh these prices every 24 hours.
+## 2. UI/UX Overhaul
+* **Modernize Look:** Enhance `index.css` with a "Glassmorphism" effect for cards and improved "Gold" accent interactions.
+* **Responsive Tables:** Replace standard row layouts with interactive data grids that look better on mobile.
+* **Loading States:** Implement skeleton screens or branded loaders to improve perceived performance.
 
-## 3. Net Worth Deep-Dive
-* **Historical Snapshots:** Start saving a monthly "Net Worth Snapshot" to track wealth growth over time.
-* **Debt-to-Asset Ratio:** Add a health-check metric on the dashboard.
+## 3. Automation & Market APIs
+* **Gold Price Tracking:** Integrate a live API to auto-update Gold asset values based on current market rates.
+* **Mutual Fund Integration:** Fetch daily NAV updates for manual MF entries.
+* **Scheduled Sync:** Set up a backend worker to refresh all market-linked asset values every 24 hours.
 
-## 4. Family Sharing (Early Access)
-* **Invite System:** Allow a "Head of Family" to invite another user to view (but not edit) the dashboard.
+## 4. Family Sharing & Insights
+* **Shared Access:** Allow a primary user to invite family members with "Read-Only" permissions.
+* **Spend Alerts:** Implement frontend notifications when a category (e.g., "Food") exceeds a set monthly budget.
