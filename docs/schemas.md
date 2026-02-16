@@ -1,16 +1,34 @@
-## Approved Asset Schema (Phase 1)
+# Database Schema - Selvam Finance Tracker
 
-Asset
- ├── userId       (ObjectId, required)
- ├── assetType    (String, required)
- ├── name         (String, required)
- ├── value        (Number, required)
- ├── createdAt    (Date, auto)
- ├── updatedAt    (Date, auto)
+## 1. User Schema
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| name | String | User's full name |
+| email | String | Unique login identifier |
+| password | String | Hashed via bcrypt |
 
-Notes:
-- Each asset belongs to exactly one user
-- userId comes from JWT middleware (req.user)
-- Manual entry only (no market APIs in Phase 1)
+## 2. Asset Schema
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| user | ObjectId | Ref to User (req.user._id) |
+| assetType | String | e.g., Cash, Gold, FD |
+| name | String | Custom identifier (e.g., "HDFC Savings") |
+| value | Number | Current valuation |
 
+## 3. Expense Schema
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| user | ObjectId | Ref to User |
+| amount | Number | Transaction value |
+| category | String | Food, Rent, Transport, etc. |
+| date | Date | Transaction date |
+| description | String | Optional notes |
 
+## 4. Liability Schema
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| user | ObjectId | Ref to User |
+| type | String | Loan, Credit Card, EMI |
+| amount | Number | Outstanding balance |
+| interestRate| Number | Annual % (Optional) |
+| dueDate | Date | Payment deadline |
