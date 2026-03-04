@@ -1,6 +1,8 @@
 import Asset from "../models/Asset.js";
 import Liability from "../models/Liability.js";
 import Expense from "../models/Expense.js";
+import { calculateCurrentAssetValue } from "../utils/financeCalculator.js";
+import { getGoldPrice } from "../services/marketService.js";
 
 /*
   @desc    Get dashboard summary (assets, liabilities, net worth)
@@ -9,19 +11,43 @@ import Expense from "../models/Expense.js";
 */
 export const getDashboardSummary = async (req, res) => {
   try {
+
     const userId = req.user._id;
 
-    const assetAgg = await Asset.aggregate([
-      { $match: { userId } },
-      { $group: { _id: null, total: { $sum: "$value" } } }
-    ]);
+    // Fetch all assets of user
+    const assets = await Asset.find({ userId });
 
+    // Fetch live gold price
+    const goldPrice = await getGoldPrice();
+
+    let totalAssets = 0;
+
+    // Calculate dynamic asset value
+    assets.forEach((asset) => {
+
+      let currentValue;
+
+      if (asset.assetType && asset.assetType.toLowerCase() === "gold") {
+        currentValue = calculateCurrentAssetValue(asset, goldPrice);
+      } else {
+        currentValue = calculateCurrentAssetValue(asset);
+      }
+
+      totalAssets += currentValue;
+
+    });
+
+    // Liabilities remain unchanged
     const liabilityAgg = await Liability.aggregate([
       { $match: { user: userId } },
-      { $group: { _id: null, total: { $sum: "$amount" } } }
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" }
+        }
+      }
     ]);
 
-    const totalAssets = assetAgg[0]?.total || 0;
     const totalLiabilities = liabilityAgg[0]?.total || 0;
 
     res.status(200).json({
@@ -36,6 +62,7 @@ export const getDashboardSummary = async (req, res) => {
   }
 };
 
+
 /*
   @desc    Get expense breakdown (category-wise & month-wise)
   @route   GET /api/dashboard/expenses
@@ -43,6 +70,7 @@ export const getDashboardSummary = async (req, res) => {
 */
 export const getExpenseSummary = async (req, res) => {
   try {
+
     const userId = req.user._id;
 
     const byCategory = await Expense.aggregate([
@@ -89,25 +117,26 @@ export const getExpenseSummary = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch expense summary" });
   }
 };
- /*
+
+
+/*
   @desc    Get liability breakdown (for pie chart)
   @route   GET /api/dashboard/liabilities
   @access  Protected
 */
 export const getLiabilityBreakdown = async (req, res) => {
   try {
+
     const userId = req.user._id;
 
     const liabilities = await Liability.aggregate([
       { $match: { user: userId } },
-
       {
         $group: {
           _id: "$type",
           total: { $sum: "$amount" }
         }
       },
-
       {
         $project: {
           _id: 0,

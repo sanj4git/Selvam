@@ -1,4 +1,5 @@
 import Asset from "../models/Asset.js";
+import { calculateCurrentAssetValue } from "../utils/financeCalculator.js";
 
 /*
   @desc    Create a new asset
@@ -7,7 +8,7 @@ import Asset from "../models/Asset.js";
 */
 export const createAsset = async (req, res) => {
   try {
-    const { assetType, name, value } = req.body;
+    const { assetType, name, value, interestRate, compoundingFrequency, purchaseDate, quantity } = req.body;
 
     // Basic validation
     if (!assetType || !name || value === undefined) {
@@ -22,14 +23,20 @@ export const createAsset = async (req, res) => {
       assetType,
       name,
       value,
+      interestRate,
+      compoundingFrequency,
+      purchaseDate,
+      quantity,
     });
 
     res.status(201).json(asset);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /*
   @desc    Get all assets of logged-in user
@@ -38,14 +45,29 @@ export const createAsset = async (req, res) => {
 */
 export const getAssets = async (req, res) => {
   try {
+
     const assets = await Asset.find({ userId: req.user });
 
-    res.status(200).json(assets);
+    // Calculate dynamic value for each asset
+    const updatedAssets = assets.map((asset) => {
+
+      const currentValue = calculateCurrentAssetValue(asset);
+
+      return {
+        ...asset.toObject(),
+        currentValue,
+      };
+
+    });
+
+    res.status(200).json(updatedAssets);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /*
   @desc    Update an existing asset
@@ -54,6 +76,7 @@ export const getAssets = async (req, res) => {
 */
 export const updateAsset = async (req, res) => {
   try {
+
     const asset = await Asset.findById(req.params.id);
 
     // Check if asset exists
@@ -73,11 +96,13 @@ export const updateAsset = async (req, res) => {
     );
 
     res.status(200).json(updatedAsset);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /*
   @desc    Delete an asset
@@ -86,6 +111,7 @@ export const updateAsset = async (req, res) => {
 */
 export const deleteAsset = async (req, res) => {
   try {
+
     const asset = await Asset.findById(req.params.id);
 
     // Check if asset exists
@@ -101,6 +127,7 @@ export const deleteAsset = async (req, res) => {
     await asset.deleteOne();
 
     res.status(200).json({ message: "Asset removed" });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

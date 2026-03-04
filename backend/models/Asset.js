@@ -4,44 +4,92 @@ import mongoose from "mongoose";
   Asset Schema
   -------------
   Represents a single asset owned by a user.
-  Each asset is linked to exactly one user via userId.
 */
 
 const assetSchema = new mongoose.Schema(
   {
-    // Reference to the User who owns this asset
+    /*
+      User Reference
+    */
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User", // links Asset -> User collection
+      ref: "User",
     },
 
-    // Category/type of asset (cash, gold, FD, stock, etc.)
+    /*
+      Type of asset
+      Example:
+      cash, gold, fd, stock
+    */
     assetType: {
       type: String,
       required: true,
     },
 
-    // Human-readable name for the asset
-    // Example: "SBI Savings Account", "Gold Necklace"
+    /*
+      Asset name
+      Example:
+      SBI FD
+      Gold Necklace
+    */
     name: {
       type: String,
       required: true,
     },
 
-    // Current value of the asset (assumed INR)
+    /*
+      Original value entered by user
+      (principal amount)
+    */
     value: {
       type: Number,
       required: true,
     },
+
+    /*
+      Interest rate for FD / savings
+    */
+    interestRate: {
+      type: Number,
+      default: 0,
+    },
+
+    /*
+      Compounding frequency
+      yearly / monthly / daily
+    */
+    compoundingFrequency: {
+      type: String,
+      enum: ["yearly", "monthly", "daily"],
+      default: "yearly",
+    },
+
+    /*
+      Purchase or investment date
+      Used to calculate growth
+    */
+    purchaseDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    /*
+      Quantity for market assets
+      Example:
+      gold grams
+      stock shares
+    */
+    quantity: {
+      type: Number,
+      default: 1,
+    },
   },
   {
-    // Automatically adds createdAt and updatedAt
     timestamps: true,
   }
 );
 
-// Create Asset model
 const Asset = mongoose.model("Asset", assetSchema);
 
 export default Asset;
