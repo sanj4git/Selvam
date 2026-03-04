@@ -89,3 +89,38 @@ export const getExpenseSummary = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch expense summary" });
   }
 };
+ /*
+  @desc    Get liability breakdown (for pie chart)
+  @route   GET /api/dashboard/liabilities
+  @access  Protected
+*/
+export const getLiabilityBreakdown = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const liabilities = await Liability.aggregate([
+      { $match: { user: userId } },
+
+      {
+        $group: {
+          _id: "$type",
+          total: { $sum: "$amount" }
+        }
+      },
+
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          total: 1
+        }
+      }
+    ]);
+
+    res.status(200).json(liabilities);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch liability breakdown" });
+  }
+};
