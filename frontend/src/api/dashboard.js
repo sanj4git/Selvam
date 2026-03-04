@@ -6,6 +6,7 @@
   Endpoints consumed:
   - GET /api/dashboard/summary   → { totalAssets, totalLiabilities, netWorth }
   - GET /api/dashboard/expenses  → { byCategory: [{category, total}], byMonth: [{month, total}] }
+  - GET /api/dashboard/liabilities → [{category, total}]
 
   Both endpoints are JWT-protected; the Axios interceptor in client.js
   automatically attaches the Bearer token.
@@ -28,5 +29,14 @@ export async function getSummary() {
  */
 export async function getExpenseAnalytics() {
     const { data } = await api.get("/api/dashboard/expenses");
+    return data;
+}
+
+/**
+ * Fetch liability breakdown (used for pie chart visualization).
+ * @returns {Promise<Array<{category: string, total: number}>>}
+ */
+export async function getLiabilityBreakdown() {
+    const { data } = await api.get("/api/dashboard/liabilities");
     return data;
 }
