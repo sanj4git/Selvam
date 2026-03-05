@@ -8,7 +8,7 @@ import { calculateCurrentAssetValue } from "../utils/financeCalculator.js";
 */
 export const createAsset = async (req, res) => {
   try {
-    const { assetType, name, value, interestRate, compoundingFrequency, purchaseDate, quantity } = req.body;
+    const { assetType, name, value, interestRate, compoundingFrequency, purchaseDate, quantity, symbol, isMarketLinked } = req.body;
 
     // Basic validation
     if (!assetType || !name || value === undefined) {
@@ -26,7 +26,9 @@ export const createAsset = async (req, res) => {
       interestRate,
       compoundingFrequency,
       purchaseDate,
-      quantity,
+      ...(quantity !== undefined && { quantity }),
+      ...(symbol && { symbol }),
+      ...(isMarketLinked !== undefined && { isMarketLinked }),
     });
 
     res.status(201).json(asset);
@@ -85,7 +87,7 @@ export const updateAsset = async (req, res) => {
     }
 
     // Ensure asset belongs to logged-in user
-    if (asset.userId.toString() !== req.user) {
+    if (asset.userId.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: "Not authorized" });
     }
 
@@ -120,7 +122,7 @@ export const deleteAsset = async (req, res) => {
     }
 
     // Ensure asset belongs to logged-in user
-    if (asset.userId.toString() !== req.user) {
+    if (asset.userId.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: "Not authorized" });
     }
 

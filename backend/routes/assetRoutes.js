@@ -5,6 +5,7 @@ import {
   updateAsset,
   deleteAsset,
 } from "../controllers/assetController.js";
+import { triggerSync } from "../controllers/valuationController.js";
 
 // Auth middleware (we will create this next)
 import protect from "../middlewares/authMiddleware.js";
@@ -38,5 +39,12 @@ router.put("/:id", protect, updateAsset);
   @access  Protected
 */
 router.delete("/:id", protect, deleteAsset);
+
+/*
+  @route   POST /api/assets/sync
+  @desc    Manually trigger valuation sync
+  @access  Protected
+*/
+router.post("/sync", protect, triggerSync);
 
 export default router;
