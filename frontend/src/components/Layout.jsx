@@ -42,6 +42,7 @@ export default function Layout({ children }) {
           <NavLink to="/expenses">Expenses</NavLink>
           <NavLink to="/assets">Assets</NavLink>
           <NavLink to="/liabilities">Liabilities</NavLink>
+          <NavLink to="/family">Family Settings</NavLink>
         </nav>
 
         {/* ── User info & logout ── */}

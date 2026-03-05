@@ -1,4 +1,5 @@
 import Liability from "../models/Liability.js";
+import User from "../models/User.js";
 
 /*
   @desc    Add a new liability
@@ -36,9 +37,12 @@ export const addLiability = async (req, res) => {
 */
 export const getLiabilities = async (req, res) => {
   try {
-    // Fetch liabilities belonging only to the logged-in user
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id);
+
+    // Fetch liabilities belonging to the family
     const liabilities = await Liability.find({
-      user: req.user._id,
+      user: { $in: familyUserIds },
     }).sort({ dueDate: 1 }); // nearest due date first
 
     res.status(200).json(liabilities);
@@ -69,8 +73,11 @@ export const updateLiability = async (req, res) => {
       });
     }
 
-    // Ensure the liability belongs to the logged-in user
-    if (liability.user.toString() !== req.user._id.toString()) {
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id.toString());
+
+    // Ensure the liability belongs to the family
+    if (!familyUserIds.includes(liability.user.toString())) {
       return res.status(401).json({
         message: "Not authorized to update this liability",
       });
@@ -114,8 +121,11 @@ export const deleteLiability = async (req, res) => {
       });
     }
 
-    // Ensure the liability belongs to the logged-in user
-    if (liability.user.toString() !== req.user._id.toString()) {
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id.toString());
+
+    // Ensure the liability belongs to the family
+    if (!familyUserIds.includes(liability.user.toString())) {
       return res.status(401).json({
         message: "Not authorized to delete this liability",
       });

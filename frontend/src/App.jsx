@@ -28,6 +28,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Expenses from "./pages/Expenses.jsx";
 import Assets from "./pages/Assets.jsx";
 import Liabilities from "./pages/Liabilities.jsx";
+import FamilySettings from "./pages/FamilySettings.jsx";
 
 export default function App() {
   return (
@@ -75,6 +76,16 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <Liabilities />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/family"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <FamilySettings />
               </Layout>
             </ProtectedRoute>
           }

@@ -8,6 +8,7 @@ import assetRoutes from "./routes/assetRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import liabilityRoutes from "./routes/liabilityRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import familyRoutes from "./routes/familyRoutes.js";
 import cors from 'cors';
 
 
@@ -25,6 +26,9 @@ app.use(express.json());
 
 // Register Route
 app.use("/api/auth", authRoutes);
+
+// Family Routes
+app.use("/api/family", familyRoutes);
 
 // Asset Routes
 app.use("/api/assets", assetRoutes);

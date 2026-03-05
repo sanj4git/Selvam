@@ -22,6 +22,8 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Head");
+  const [joinCode, setJoinCode] = useState("");
   const [formError, setFormError] = useState("");
 
   /**
@@ -33,11 +35,16 @@ export default function Register() {
     setFormError("");
 
     if (!name || !email || !password) {
-      setFormError("All fields are required");
+      setFormError("Basic fields are required");
       return;
     }
 
-    const result = await register(name.trim(), email.trim(), password);
+    if (role === "Member" && !joinCode.trim()) {
+      setFormError("Join code is required to become a member");
+      return;
+    }
+
+    const result = await register(name.trim(), email.trim(), password, role, joinCode.trim());
     if (result.ok) {
       navigate("/dashboard");
     }
@@ -139,6 +146,46 @@ export default function Register() {
                 />
               </div>
             </div>
+
+            {/* Role selection */}
+            <div className="auth-field">
+              <label htmlFor="reg-role">Role</label>
+              <div className="auth-input-wrap">
+                <select
+                  id="reg-role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  style={{ appearance: "none" }}
+                >
+                  <option value="Head">Head (Create a new family)</option>
+                  <option value="Member">Member (Join existing family)</option>
+                </select>
+                <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Conditional Join Code */}
+            {role === "Member" && (
+              <div className="auth-field">
+                <label htmlFor="reg-joincode">Family Join Code</label>
+                <div className="auth-input-wrap">
+                  <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  <input
+                    id="reg-joincode"
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value)}
+                    placeholder="Enter 8-digit code"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Submit */}
             <button className="auth-submit" type="submit" disabled={loading}>

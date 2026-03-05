@@ -1,4 +1,5 @@
 import Expense from "../models/Expense.js";
+import User from "../models/User.js";
 
 /*
   @desc    Add a new expense
@@ -36,8 +37,11 @@ export const addExpense = async (req, res) => {
 */
 export const getExpenses = async (req, res) => {
     try {
-        // Fetch expenses belonging only to the logged-in user
-        const expenses = await Expense.find({ user: req.user._id })
+        const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+        const familyUserIds = familyMembers.map(m => m._id);
+
+        // Fetch expenses belonging to the family
+        const expenses = await Expense.find({ user: { $in: familyUserIds } })
             .sort({ date: -1 }); // latest expenses first
 
         res.status(200).json(expenses);
@@ -68,8 +72,11 @@ export const updateExpense = async (req, res) => {
             });
         }
 
-        // Ensure the expense belongs to the logged-in user
-        if (expense.user.toString() !== req.user._id.toString()) {
+        const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+        const familyUserIds = familyMembers.map(m => m._id.toString());
+
+        // Ensure the expense belongs to the family
+        if (!familyUserIds.includes(expense.user.toString())) {
             return res.status(401).json({
                 message: "Not authorized to update this expense",
             });
@@ -112,8 +119,11 @@ export const deleteExpense = async (req, res) => {
             });
         }
 
-        // Ensure the expense belongs to the logged-in user
-        if (expense.user.toString() !== req.user._id.toString()) {
+        const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+        const familyUserIds = familyMembers.map(m => m._id.toString());
+
+        // Ensure the expense belongs to the family
+        if (!familyUserIds.includes(expense.user.toString())) {
             return res.status(401).json({
                 message: "Not authorized to delete this expense",
             });
