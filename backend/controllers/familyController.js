@@ -3,6 +3,37 @@ import User from "../models/User.js";
 import crypto from "crypto";
 
 /*
+  @desc    Create a new family from settings
+  @route   POST /api/family/create
+  @access  Protected
+*/
+export const createFamily = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (user.familyId) {
+            return res.status(400).json({ message: "You are already part of a family" });
+        }
+
+        const newJoinCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+        const family = await Family.create({
+            name: `${user.name}'s Family`,
+            joinCode: newJoinCode,
+            headUserId: user._id,
+        });
+
+        user.familyId = family._id;
+        user.role = "Head";
+        await user.save();
+
+        res.status(201).json({ message: "Family created successfully", joinCode: newJoinCode });
+    } catch (error) {
+        console.error("Create family error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+/*
   @desc    Generate a new join code for the family
   @route   POST /api/family/join-code
   @access  Protected (Head only)

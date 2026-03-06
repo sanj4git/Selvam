@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getFamily, generateJoinCode, joinFamily } from "../api/family.js";
+import { getFamily, generateJoinCode, joinFamily, createFamily } from "../api/family.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function FamilySettings() {
@@ -52,6 +52,18 @@ export default function FamilySettings() {
             fetchFamily();
         } catch (err) {
             setError(err?.response?.data?.message || "Failed to join family");
+        }
+    };
+
+    const handleCreateFamily = async () => {
+        try {
+            setError("");
+            setSuccess("");
+            await createFamily();
+            setSuccess("Successfully created a new family.");
+            fetchFamily();
+        } catch (err) {
+            setError(err?.response?.data?.message || "Failed to create family");
         }
     };
 
@@ -138,7 +150,7 @@ export default function FamilySettings() {
             )}
 
             {/* Join Another Family Card */}
-            <div className="card">
+            <div className="card" style={{ marginBottom: "1.5rem" }}>
                 <h3>Join Existing Family</h3>
                 <p className="muted" style={{ marginBottom: "1.5rem" }}>
                     Have a join code from another family head? Enter it below.
@@ -159,6 +171,20 @@ export default function FamilySettings() {
                     </button>
                 </form>
             </div>
+
+            {/* Create New Family Card (only if not already a head) */}
+            {!familyData && (
+                <div className="card">
+                    <h3>Create a New Family</h3>
+                    <p className="muted" style={{ marginBottom: "1.5rem" }}>
+                        Don't have a family to join? You can create your own family unit and become the Head.
+                        You will be able to invite members later.
+                    </p>
+                    <button onClick={handleCreateFamily} className="btn" style={{ background: "var(--gold-accent)", color: "var(--dark-navy)" }}>
+                        Create Family
+                    </button>
+                </div>
+            )}
         </section>
     );
 }
