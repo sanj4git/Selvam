@@ -29,7 +29,10 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        const newRole = role === "Member" ? "Member" : "Head";
+        let newRole = "None"; // Default if not provided
+        if (role === "Member" || role === "Head") {
+            newRole = role;
+        }
 
         let linkedFamilyId = null;
 
