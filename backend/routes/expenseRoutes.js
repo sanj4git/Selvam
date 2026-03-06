@@ -1,5 +1,6 @@
 import express from "express";
 import protect from "../middlewares/authMiddleware.js";
+import { requireHeadRole } from "../middlewares/familyMiddleware.js";
 import {
   validateCreateExpense,
   validateUpdateExpense,
@@ -20,9 +21,9 @@ router.post("/", protect, validateCreateExpense, addExpense);
 router.get("/", protect, getExpenses);
 
 // UPDATE expense → flexible validation
-router.put("/:id", protect, validateUpdateExpense, updateExpense);
+router.put("/:id", protect, requireHeadRole, validateUpdateExpense, updateExpense);
 
 // DELETE expense
-router.delete("/:id", protect, deleteExpense);
+router.delete("/:id", protect, requireHeadRole, deleteExpense);
 
 export default router;

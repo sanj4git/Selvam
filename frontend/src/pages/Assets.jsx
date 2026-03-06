@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { listAssets, addAsset, updateAsset, deleteAsset } from "../api/assets.js";
+import { listAssets, addAsset, updateAsset, deleteAsset, triggerSync } from "../api/assets.js";
 
 const emptyForm = {
   assetType: "",
   name: "",
-  value: ""
+  value: "",
+  quantity: 1,
+  symbol: "",
+  isMarketLinked: false
 };
 
 export default function Assets() {
@@ -52,7 +55,10 @@ export default function Assets() {
     const payload = {
       assetType: form.assetType,
       name: form.name,
-      value: Number(form.value)
+      value: Number(form.value),
+      isMarketLinked: form.isMarketLinked,
+      ...(form.isMarketLinked && { quantity: Number(form.quantity) }),
+      ...(form.isMarketLinked && form.symbol && { symbol: form.symbol }),
     };
 
     try {
@@ -74,7 +80,10 @@ export default function Assets() {
     setForm({
       assetType: item.assetType ?? "",
       name: item.name ?? "",
-      value: item.value ?? ""
+      value: item.value ?? "",
+      quantity: item.quantity ?? 1,
+      symbol: item.symbol ?? "",
+      isMarketLinked: item.isMarketLinked ?? false,
     });
   };
 
@@ -85,6 +94,18 @@ export default function Assets() {
       if (editId === id) resetForm();
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to delete asset");
+    }
+  };
+
+  const handleSync = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      await triggerSync();
+      await fetchItems(); // Refresh the list with new values
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to sync market prices");
+      setLoading(false);
     }
   };
 
@@ -126,7 +147,43 @@ export default function Assets() {
               onChange={(e) => handleChange("value", e.target.value)}
             />
           </label>
-          <div className="actions">
+          <div className="checkbox-container" style={{ marginTop: "1rem" }}>
+            <label style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={form.isMarketLinked}
+                onChange={(e) => handleChange("isMarketLinked", e.target.checked)}
+                style={{ margin: 0, width: "auto" }}
+              />
+              <span style={{ fontSize: "0.9rem" }}>Track Live Market Value (Gold / Mutual Funds)</span>
+            </label>
+          </div>
+
+          {form.isMarketLinked && (
+            <div className="grid" style={{ marginTop: "1rem" }}>
+              <label>
+                Quantity (Grams / Units)
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.quantity}
+                  onChange={(e) => handleChange("quantity", e.target.value)}
+                  placeholder="e.g. 10.5"
+                />
+              </label>
+              <label>
+                Symbol / Scheme Code (For MF)
+                <input
+                  type="text"
+                  value={form.symbol}
+                  onChange={(e) => handleChange("symbol", e.target.value)}
+                  placeholder="e.g. 102885"
+                />
+              </label>
+            </div>
+          )}
+
+          <div className="actions" style={{ marginTop: "1.5rem" }}>
             <button className="btn" type="submit">
               {editId ? "Save Changes" : "Add Asset"}
             </button>
@@ -140,7 +197,17 @@ export default function Assets() {
       </div>
 
       <div className="card">
-        <h3>Assets List</h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h3 style={{ margin: 0 }}>Assets List</h3>
+          <button
+            className="btn btn-secondary"
+            onClick={handleSync}
+            disabled={loading}
+            style={{ fontSize: "0.85rem", padding: "6px 12px" }}
+          >
+            {loading ? "Syncing..." : "Sync Market Prices"}
+          </button>
+        </div>
         {loading ? (
           <div className="muted">Loading...</div>
         ) : items.length === 0 ? (

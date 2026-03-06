@@ -5,9 +5,11 @@ import {
   updateAsset,
   deleteAsset,
 } from "../controllers/assetController.js";
+import { triggerSync } from "../controllers/valuationController.js";
 
 // Auth middleware (we will create this next)
 import protect from "../middlewares/authMiddleware.js";
+import { requireHeadRole } from "../middlewares/familyMiddleware.js";
 
 const router = express.Router();
 
@@ -30,13 +32,20 @@ router.get("/", protect, getAssets);
   @desc    Update an existing asset
   @access  Protected
 */
-router.put("/:id", protect, updateAsset);
+router.put("/:id", protect, requireHeadRole, updateAsset);
 
 /*
   @route   DELETE /api/assets/:id
   @desc    Delete an asset
   @access  Protected
 */
-router.delete("/:id", protect, deleteAsset);
+router.delete("/:id", protect, requireHeadRole, deleteAsset);
+
+/*
+  @route   POST /api/assets/sync
+  @desc    Manually trigger valuation sync
+  @access  Protected
+*/
+router.post("/sync", protect, triggerSync);
 
 export default router;

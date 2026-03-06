@@ -1,4 +1,5 @@
 import Asset from "../models/Asset.js";
+import User from "../models/User.js";
 import { calculateCurrentAssetValue } from "../utils/financeCalculator.js";
 
 /*
@@ -8,7 +9,7 @@ import { calculateCurrentAssetValue } from "../utils/financeCalculator.js";
 */
 export const createAsset = async (req, res) => {
   try {
-    const { assetType, name, value, interestRate, compoundingFrequency, purchaseDate, quantity } = req.body;
+    const { assetType, name, value, interestRate, compoundingFrequency, purchaseDate, quantity, symbol, isMarketLinked } = req.body;
 
     // Basic validation
     if (!assetType || !name || value === undefined) {
@@ -26,7 +27,9 @@ export const createAsset = async (req, res) => {
       interestRate,
       compoundingFrequency,
       purchaseDate,
-      quantity,
+      ...(quantity !== undefined && { quantity }),
+      ...(symbol && { symbol }),
+      ...(isMarketLinked !== undefined && { isMarketLinked }),
     });
 
     res.status(201).json(asset);
@@ -46,7 +49,10 @@ export const createAsset = async (req, res) => {
 export const getAssets = async (req, res) => {
   try {
 
-    const assets = await Asset.find({ userId: req.user });
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id);
+
+    const assets = await Asset.find({ userId: { $in: familyUserIds } });
 
     // Calculate dynamic value for each asset
     const updatedAssets = assets.map((asset) => {
@@ -84,8 +90,11 @@ export const updateAsset = async (req, res) => {
       return res.status(404).json({ message: "Asset not found" });
     }
 
-    // Ensure asset belongs to logged-in user
-    if (asset.userId.toString() !== req.user) {
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id.toString());
+
+    // Ensure asset belongs to the same family
+    if (!familyUserIds.includes(asset.userId.toString())) {
       return res.status(401).json({ message: "Not authorized" });
     }
 
@@ -119,8 +128,11 @@ export const deleteAsset = async (req, res) => {
       return res.status(404).json({ message: "Asset not found" });
     }
 
-    // Ensure asset belongs to logged-in user
-    if (asset.userId.toString() !== req.user) {
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id.toString());
+
+    // Ensure asset belongs to the same family
+    if (!familyUserIds.includes(asset.userId.toString())) {
       return res.status(401).json({ message: "Not authorized" });
     }
 

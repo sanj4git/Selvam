@@ -1,6 +1,7 @@
 import Asset from "../models/Asset.js";
 import Liability from "../models/Liability.js";
 import Expense from "../models/Expense.js";
+import User from "../models/User.js";
 import { calculateCurrentAssetValue } from "../utils/financeCalculator.js";
 import { getGoldPrice } from "../services/marketService.js";
 
@@ -12,10 +13,11 @@ import { getGoldPrice } from "../services/marketService.js";
 export const getDashboardSummary = async (req, res) => {
   try {
 
-    const userId = req.user._id;
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id);
 
-    // Fetch all assets of user
-    const assets = await Asset.find({ userId });
+    // Fetch all assets of family
+    const assets = await Asset.find({ userId: { $in: familyUserIds } });
 
     // Fetch live gold price
     const goldPrice = await getGoldPrice();
@@ -39,7 +41,7 @@ export const getDashboardSummary = async (req, res) => {
 
     // Liabilities remain unchanged
     const liabilityAgg = await Liability.aggregate([
-      { $match: { user: userId } },
+      { $match: { user: { $in: familyUserIds } } },
       {
         $group: {
           _id: null,
@@ -71,10 +73,11 @@ export const getDashboardSummary = async (req, res) => {
 export const getExpenseSummary = async (req, res) => {
   try {
 
-    const userId = req.user._id;
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id);
 
     const byCategory = await Expense.aggregate([
-      { $match: { user: userId } },
+      { $match: { user: { $in: familyUserIds } } },
       {
         $group: {
           _id: "$category",
@@ -91,7 +94,7 @@ export const getExpenseSummary = async (req, res) => {
     ]);
 
     const byMonth = await Expense.aggregate([
-      { $match: { user: userId } },
+      { $match: { user: { $in: familyUserIds } } },
       {
         $group: {
           _id: {
@@ -127,10 +130,11 @@ export const getExpenseSummary = async (req, res) => {
 export const getLiabilityBreakdown = async (req, res) => {
   try {
 
-    const userId = req.user._id;
+    const familyMembers = await User.find({ familyId: req.user.familyId }).select('_id');
+    const familyUserIds = familyMembers.map(m => m._id);
 
     const liabilities = await Liability.aggregate([
-      { $match: { user: userId } },
+      { $match: { user: { $in: familyUserIds } } },
       {
         $group: {
           _id: "$type",

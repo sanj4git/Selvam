@@ -19,3 +19,8 @@ export async function deleteAsset(id) {
   const { data } = await api.delete(`/api/assets/${id}`);
   return data;
 }
+
+export async function triggerSync() {
+  const { data } = await api.post("/api/assets/sync");
+  return data;
+}

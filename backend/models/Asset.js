@@ -84,6 +84,22 @@ const assetSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
+
+    /*
+      Flag to track live market prices (Mutual Funds, Gold)
+    */
+    isMarketLinked: {
+      type: Boolean,
+      default: false,
+    },
+
+    /*
+      Symbol or scheme code for market tracking
+    */
+    symbol: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

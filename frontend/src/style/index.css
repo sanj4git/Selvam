@@ -1099,7 +1099,8 @@ textarea {
   pointer-events: none;
 }
 
-.auth-input-wrap input {
+.auth-input-wrap input,
+.auth-input-wrap select {
   width: 100%;
   padding: 12px 14px 12px 44px;
   border-radius: 14px;
@@ -1114,7 +1115,8 @@ textarea {
   color: rgba(255, 255, 255, 0.35);
 }
 
-.auth-input-wrap input:focus {
+.auth-input-wrap input:focus,
+.auth-input-wrap select:focus {
   outline: none;
   border-color: var(--gold-accent);
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);

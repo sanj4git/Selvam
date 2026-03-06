@@ -49,11 +49,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, role, joinCode) => {
     setLoading(true);
     setError("");
     try {
-      const data = await registerUser({ name, email, password });
+      const data = await registerUser({ name, email, password, role, joinCode });
       setAuth(data);
       return { ok: true };
     } catch (err) {
