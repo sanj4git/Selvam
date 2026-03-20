@@ -6,18 +6,39 @@ import {
   deleteLiability
 } from "../api/liabilities.js";
 
-const emptyForm = {
-  type: "",
-  amount: "",
-  interestRate: "",
-  dueDate: ""
+const LIAB_META = {
+  "Home Loan":     { emoji: "🏠", color: "#cc5de8", bg: "rgba(204,93,232,0.12)" },
+  "Car EMI":       { emoji: "🚗", color: "#339af0", bg: "rgba(51,154,240,0.12)" },
+  "Credit Card":   { emoji: "💳", color: "#ff6b6b", bg: "rgba(255,107,107,0.12)" },
+  "Personal Loan": { emoji: "💸", color: "#f59f00", bg: "rgba(245,159,0,0.12)"  },
+  "Education Loan":{ emoji: "🎓", color: "#51cf66", bg: "rgba(81,207,102,0.12)" },
 };
+
+function getLiabMeta(type) {
+  const key = Object.keys(LIAB_META).find(k => k.toLowerCase() === (type||'').toLowerCase());
+  return LIAB_META[key] || { emoji: "📋", color: "#adb5bd", bg: "rgba(173,181,189,0.12)" };
+}
+
+function formatINR(n) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR", maximumFractionDigits: 0,
+  }).format(n);
+}
+
+const emptyForm = { type: "", amount: "", interestRate: "", dueDate: "" };
 
 function formatDate(value) {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
   return d.toISOString().slice(0, 10);
+}
+
+function formatDisplayDate(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default function Liabilities() {
@@ -163,36 +184,50 @@ export default function Liabilities() {
       </div>
 
       <div className="card">
-        <h3>Liabilities List</h3>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h3 style={{ margin: 0 }}>Liabilities Overview</h3>
+          {items.length > 0 && (
+            <p className="muted" style={{ marginTop: 4, fontSize: "0.85rem" }}>
+              Total owed: <strong style={{ color: "#ff6b6b" }}>{formatINR(items.reduce((s, l) => s + (l.amount || 0), 0))}</strong>
+            </p>
+          )}
+        </div>
         {loading ? (
-          <div className="muted">Loading...</div>
+          <div className="muted">Loading…</div>
         ) : items.length === 0 ? (
-          <div className="muted">No liabilities yet</div>
+          <div className="exp-empty">
+            <span style={{ fontSize: "2.5rem" }}>✅</span>
+            <p>No liabilities. Debt-free!</p>
+          </div>
         ) : (
-          <div className="table">
-            <div className="table-row table-head">
-              <div>Type</div>
-              <div>Amount</div>
-              <div>Interest</div>
-              <div>Due Date</div>
-              <div></div>
-            </div>
-            {items.map((item) => (
-              <div key={item._id} className="table-row">
-                <div>{item.type}</div>
-                <div>? {Number(item.amount).toFixed(2)}</div>
-                <div>{item.interestRate ?? "-"}</div>
-                <div>{formatDate(item.dueDate)}</div>
-                <div className="row-actions">
-                  <button className="btn btn-link" onClick={() => startEdit(item)}>
-                    Edit
-                  </button>
-                  <button className="btn btn-link danger" onClick={() => handleDelete(item._id)}>
-                    Delete
-                  </button>
+          <div className="exp-list">
+            {items.map(item => {
+              const meta = getLiabMeta(item.type);
+              const isOverdue = item.dueDate && new Date(item.dueDate) < new Date();
+              return (
+                <div key={item._id} className="exp-row">
+                  <div className="exp-row-icon" style={{ background: meta.bg, color: meta.color }}>
+                    {meta.emoji}
+                  </div>
+                  <div className="exp-row-info">
+                    <span className="exp-row-cat">{item.type}</span>
+                    <span className="exp-row-desc" style={isOverdue ? { color: "#ff6b6b" } : {}}>
+                      Due: {formatDisplayDate(item.dueDate)}{isOverdue ? " ⚠ Overdue" : ""}
+                    </span>
+                  </div>
+                  <div className="exp-row-right">
+                    <span className="exp-row-amount" style={{ color: "#ff6b6b" }}>{formatINR(item.amount)}</span>
+                    {item.interestRate && (
+                      <span className="exp-row-date">{item.interestRate}% p.a.</span>
+                    )}
+                  </div>
+                  <div className="exp-row-actions">
+                    <button className="exp-action-btn" onClick={() => startEdit(item)} title="Edit">✏️</button>
+                    <button className="exp-action-btn exp-action-btn--danger" onClick={() => handleDelete(item._id)} title="Delete">🗑️</button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

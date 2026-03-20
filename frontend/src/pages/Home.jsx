@@ -1,243 +1,295 @@
 /*
   Home.jsx
   --------
-  Landing page for unauthenticated visitors.
+  Massively redesigned premium landing page.
 
-  Behaviour:
-  - If the user is already logged in (JWT token present), they are
-    redirected straight to the Dashboard.
-  - Otherwise, a premium marketing landing page is rendered with:
-      1. Sticky glassmorphism navigation bar
-      2. Full-viewport hero section with CTAs
-      3. 6-card features grid
-      4. 3-step "How it works" section
-      5. Stats highlight bar
-      6. Final call-to-action
-      7. Footer
-
-  All content is static — no backend calls are made on this page.
+  Sections:
+  1. Sticky glassmorphism nav
+  2. Full-viewport animated hero with gradient headline + animated counter stats
+  3. "Live Preview" mock dashboard card
+  4. Feature highlights (6 glassmorphism cards)
+  5. How it works (3-step timeline)
+  6. Stats highlight bar
+  7. Final CTA with gradient card
+  8. Footer
 */
 
 import { Navigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import logo from "../assets/logo.jpeg";
 
-/* ── Inline SVG icon components (zero external dependency) ────────── */
+/* ── Animation hook for counting up numbers ─────────────────────── */
+function useCountUp(target, duration = 1800) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { setCount(target); clearInterval(timer); }
+      else setCount(Math.floor(start));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration]);
+  return count;
+}
 
-/** Credit-card style icon for Expense Tracking */
+/* ── Inline SVG icons ──────────────────────────────────────────── */
 const IconExpense = () => (
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="5" width="20" height="14" rx="2" />
     <line x1="2" y1="10" x2="22" y2="10" />
   </svg>
 );
-
-/** Pulse / trend-line icon for Asset Management */
 const IconAsset = () => (
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
   </svg>
 );
-
-/** Dollar-sign icon for Liability Tracking */
 const IconLiability = () => (
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
   </svg>
 );
-
-/** Grid / dashboard icon for Net Worth Dashboard */
 const IconDashboard = () => (
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
   </svg>
 );
-
-/** People icon for Family-Centric feature */
 const IconFamily = () => (
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
     <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
-
-/** Robot / brain icon for AI Insights (coming soon) */
 const IconAI = () => (
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 0 6h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1 0-6h1V6a4 4 0 0 1 4-4z" />
-    <line x1="9" y1="10" x2="9" y2="10.01" />
-    <line x1="15" y1="10" x2="15" y2="10.01" />
+    <line x1="9" y1="10" x2="9" y2="10.01" /><line x1="15" y1="10" x2="15" y2="10.01" />
     <path d="M9.5 15a3.5 3.5 0 0 0 5 0" />
   </svg>
 );
-
-/** Right-arrow icon used in CTA buttons */
-const IconArrowRight = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12" />
-    <polyline points="12 5 19 12 12 19" />
+const IconArrow = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
   </svg>
 );
 
-/* ── Static data arrays ───────────────────────────────────────────── */
-
-/**
- * FEATURES — the six product highlights shown in the features grid.
- * Each has an icon, title, description, and an optional "badge"
- * (e.g. "Soon") rendered as a chip overlay.
- */
+/* ── Static feature data ─────────────────────────────────────────── */
 const FEATURES = [
-  { icon: <IconExpense />, title: "Expense Tracking", desc: "Categorise daily spending with Food, Transport, Rent and more. Get month-wise breakdowns at a glance." },
-  { icon: <IconAsset />, title: "Asset Management", desc: "Track Cash, Gold, Stocks, FDs and Real Estate in one place. See your total wealth grow over time." },
-  { icon: <IconLiability />, title: "Liability Tracking", desc: "Monitor loans, credit cards and EMIs with due-date sorting and interest rate tracking." },
-  { icon: <IconDashboard />, title: "Net Worth Dashboard", desc: "Instant snapshot of total assets minus liabilities. Understand your real financial position." },
-  { icon: <IconFamily />, title: "Family-Centric", desc: "Designed for Indian households with shared visibility, family roles, and multi-member support." },
-  { icon: <IconAI />, title: "AI Insights", desc: "Coming soon — intelligent spending analysis, monthly summaries, and personalised financial advice.", badge: "Soon" },
+  { icon: <IconExpense />, title: "Smart Expense Tracking", desc: "Log spending across 8 categories. Beautiful charts show where every rupee goes — by day, week, and month." },
+  { icon: <IconAsset />, title: "Asset Portfolio", desc: "Gold, FDs, Stocks, Real Estate, Crypto. Live gold prices, compound interest auto-calculation." },
+  { icon: <IconLiability />, title: "Liability Manager", desc: "Home loans, credit cards, EMIs with interest rates and due-date tracking. Never miss a payment." },
+  { icon: <IconDashboard />, title: "Net Worth Dashboard", desc: "Real-time snapshot of total assets minus liabilities. Recharts-powered pie and bar charts." },
+  { icon: <IconFamily />, title: "Family Finance", desc: "Create a household, share a join code. All members' data rolls up into one family dashboard." },
+  { icon: <IconAI />, title: "AI Financial Assistant", desc: "Ask Gemini AI anything about your spending. Get personalised insights on your actual data.", badge: "AI" },
 ];
 
-/**
- * STEPS — the three-step onboarding flow shown in "How it works".
- */
 const STEPS = [
-  { num: "01", title: "Create Account", desc: "Sign up in seconds with your name and email. Secure JWT-based authentication keeps your data safe." },
-  { num: "02", title: "Track Everything", desc: "Log expenses, add assets and liabilities. The platform consolidates it all into one financial picture." },
-  { num: "03", title: "Gain Clarity", desc: "View your net worth, category-wise spending, and month-on-month trends on a powerful dashboard." },
+  { num: "01", icon: "🔐", title: "Create Your Account", desc: "Sign up in seconds. Choose your role — Head of Family or Member. Secure JWT-based auth keeps you safe." },
+  { num: "02", icon: "📊", title: "Add Your Finances", desc: "Log expenses, assets, and liabilities. The platform tracks it all in real time." },
+  { num: "03", icon: "💡", title: "Get Insights", desc: "View your net worth, spending by category, monthly trends, and ask the AI chatbot for analysis." },
 ];
 
-/**
- * STATS — the four highlight metrics shown below the steps section.
- */
-const STATS = [
-  { value: "8+", label: "Asset Classes" },
-  { value: "100%", label: "India-Focused" },
-  { value: "∞", label: "Family Members" },
-  { value: "24/7", label: "Access Anywhere" },
+/* ── Mock dashboard preview data ─────────────────────────────────── */
+const MOCK_EXPENSES = [
+  { emoji: "🍽️", cat: "Food",     amt: "₹1,800", color: "#f59f00" },
+  { emoji: "🏠", cat: "Rent",     amt: "₹25,000", color: "#cc5de8" },
+  { emoji: "🚗", cat: "Transport", amt: "₹1,200", color: "#339af0" },
+  { emoji: "💊", cat: "Health",   amt: "₹2,200", color: "#51cf66" },
 ];
 
-/* ── Component ────────────────────────────────────────────────────── */
+/* ── Animated stat ─────────────────────────────────────────────── */
+function AnimStat({ value, label, prefix = "", suffix = "" }) {
+  const num = useCountUp(typeof value === "number" ? value : 0);
+  const display = typeof value === "number" ? `${prefix}${num.toLocaleString("en-IN")}${suffix}` : value;
+  return (
+    <div className="landing-stat">
+      <span className="landing-stat__value">{display}</span>
+      <span className="landing-stat__label">{label}</span>
+    </div>
+  );
+}
 
+/* ── Component ─────────────────────────────────────────────────── */
 export default function Home() {
   const { token } = useAuth();
+  const [visible, setVisible] = useState(false);
 
-  /*
-    If the user is already authenticated, skip the landing page
-    and send them straight to the financial dashboard.
-  */
-  if (token) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (token) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="landing">
-      {/* ─── Floating background orbs (purely decorative) ─── */}
+      {/* ── Animated background orbs ── */}
       <div className="landing-orb landing-orb--1" aria-hidden="true" />
       <div className="landing-orb landing-orb--2" aria-hidden="true" />
       <div className="landing-orb landing-orb--3" aria-hidden="true" />
+      <div className="landing-orb landing-orb--4" aria-hidden="true" />
 
-      {/* ─── Sticky glassmorphism navigation ─── */}
+      {/* ── Nav ── */}
       <nav className="landing-nav">
         <div className="landing-nav__brand">
-          <img className="landing-nav__logo" src={logo} alt="Selvam logo" />
+          <img className="landing-nav__logo" src={logo} alt="Selvam" />
           <span className="landing-nav__name">Selvam</span>
         </div>
         <div className="landing-nav__links">
+          <a href="#features" className="landing-nav__link">Features</a>
+          <a href="#how" className="landing-nav__link">How it works</a>
           <Link to="/login" className="landing-nav__link">Sign In</Link>
-          <Link to="/register" className="landing-nav__cta">Get Started</Link>
+          <Link to="/register" className="landing-nav__cta">Get Started →</Link>
         </div>
       </nav>
 
-      {/* ─── Hero section ─── */}
+      {/* ── Hero ── */}
       <section className="landing-hero">
-        <div className="landing-hero__content">
-          <span className="landing-badge">Unified Family Finance</span>
+        <div className={`landing-hero__content ${visible ? "visible" : ""}`}>
+          <span className="landing-badge">🇮🇳 Built for Indian Families</span>
           <h1 className="landing-hero__title">
-            Your family's complete<br />
-            <span className="landing-hero__gold">financial picture.</span>
+            One dashboard for your<br />
+            <span className="landing-hero__gradient">entire financial life.</span>
           </h1>
           <p className="landing-hero__sub">
-            Track expenses, monitor investments, manage liabilities and gain actionable
-            insights — all from a single, beautifully crafted dashboard designed for
-            Indian households.
+            Track expenses, manage assets, monitor liabilities, and get AI-powered insights —
+            all in a premium, beautifully crafted platform designed for Indian households.
           </p>
           <div className="landing-hero__actions">
             <Link to="/register" className="landing-btn landing-btn--primary">
-              Get Started Free <IconArrowRight />
+              Start for Free <IconArrow />
             </Link>
             <Link to="/login" className="landing-btn landing-btn--ghost">
               Sign In
             </Link>
           </div>
+
+          {/* ── Hero credential chips ── */}
+          <div className="landing-hero__badges">
+            <span className="landing-trust-chip">🔐 JWT Secured</span>
+            <span className="landing-trust-chip">🤖 Gemini AI Powered</span>
+            <span className="landing-trust-chip">📊 Recharts Analytics</span>
+            <span className="landing-trust-chip">☁️ MongoDB Atlas</span>
+          </div>
         </div>
       </section>
 
-      {/* ─── Features grid (6 glassmorphism cards) ─── */}
+      {/* ── Mock Dashboard Preview ── */}
+      <section className="landing-preview-section">
+        <div className="landing-preview-label">Live Preview</div>
+        <div className="landing-preview-card">
+          {/* Mini summary cards */}
+          <div className="lp-summary-row">
+            <div className="lp-summary-box lp-assets">
+              <span className="lp-box-label">Total Assets</span>
+              <span className="lp-box-val">₹22,45,000</span>
+            </div>
+            <div className="lp-summary-box lp-liab">
+              <span className="lp-box-label">Liabilities</span>
+              <span className="lp-box-val">₹40,18,500</span>
+            </div>
+            <div className="lp-summary-box lp-nw">
+              <span className="lp-box-label">Net Worth</span>
+              <span className="lp-box-val lp-positive">₹12,67,000</span>
+            </div>
+          </div>
+          {/* Mini expense rows */}
+          <div className="lp-section-title">Recent Expenses</div>
+          <div className="lp-expense-list">
+            {MOCK_EXPENSES.map(e => (
+              <div key={e.cat} className="lp-exp-row">
+                <div className="lp-exp-icon" style={{ color: e.color }}>{e.emoji}</div>
+                <span className="lp-exp-cat">{e.cat}</span>
+                <span className="lp-exp-amt">{e.amt}</span>
+              </div>
+            ))}
+          </div>
+          {/* AI chatbot preview */}
+          <div className="lp-chat-preview">
+            <div className="lp-chat-bubble lp-user">What's my biggest spending category?</div>
+            <div className="lp-chat-bubble lp-ai">
+              🤖 Your highest spend is <strong>Rent</strong> at ₹25,000/mo (42% of your total expenses). 
+              Food follows at ₹4,050 (7%). Consider optimising your transport budget which grew 23% this month.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features ── */}
       <section className="landing-section" id="features">
-        <h2 className="landing-section__title">Everything you need</h2>
-        <p className="landing-section__sub">
-          One platform to replace a dozen fragmented tools.
-        </p>
+        <h2 className="landing-section__title">Everything your family needs</h2>
+        <p className="landing-section__sub">One platform to replace a dozen financial spreadsheets.</p>
         <div className="landing-features">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="landing-feature-card">
+          {FEATURES.map((f, i) => (
+            <div key={f.title} className="landing-feature-card" style={{ animationDelay: `${i * 0.08}s` }}>
               <div className="landing-feature-card__icon">{f.icon}</div>
+              {f.badge && <span className="landing-chip landing-chip--ai">{f.badge}</span>}
               <h3>{f.title}</h3>
-              {f.badge && <span className="landing-chip">{f.badge}</span>}
               <p>{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── How it works (3-step flow) ─── */}
-      <section className="landing-section">
-        <h2 className="landing-section__title">How it works</h2>
-        <p className="landing-section__sub">Three simple steps to financial clarity.</p>
+      {/* ── How it works ── */}
+      <section className="landing-section" id="how">
+        <h2 className="landing-section__title">Get started in 3 steps</h2>
+        <p className="landing-section__sub">From sign-up to financial clarity in under 5 minutes.</p>
         <div className="landing-steps">
           {STEPS.map((s, i) => (
-            <div key={s.num} className="landing-step">
+            <div key={s.num} className="landing-step" style={{ animationDelay: `${i * 0.12}s` }}>
+              <div className="landing-step__icon-wrap">{s.icon}</div>
               <span className="landing-step__num">{s.num}</span>
               <h3>{s.title}</h3>
               <p>{s.desc}</p>
-              {i < STEPS.length - 1 && <div className="landing-step__connector" aria-hidden="true" />}
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── Stats highlight bar ─── */}
+      {/* ── Stats ── */}
       <section className="landing-stats">
-        {STATS.map((s) => (
-          <div key={s.label} className="landing-stat">
-            <span className="landing-stat__value">{s.value}</span>
-            <span className="landing-stat__label">{s.label}</span>
-          </div>
-        ))}
+        <AnimStat value={8} label="Asset Classes" suffix="+" />
+        <AnimStat value={30} label="Expense Categories" suffix="+" />
+        <AnimStat value="∞" label="Family Members" />
+        <AnimStat value="24/7" label="AI Insights" />
+        <AnimStat value={100} label="India-Focused" suffix="%" />
       </section>
 
-      {/* ─── Final CTA ─── */}
+      {/* ── Final CTA ── */}
       <section className="landing-cta">
         <div className="landing-cta__card">
-          <h2>Ready to take control?</h2>
-          <p>Join Selvam and get the clearest view of your household finances — for free.</p>
-          <Link to="/register" className="landing-btn landing-btn--primary">
-            Create Free Account <IconArrowRight />
-          </Link>
+          <span className="landing-badge" style={{ marginBottom: "1rem" }}>Free Forever</span>
+          <h2>Ready to take control of your finances?</h2>
+          <p>Join Selvam — the only platform built specifically for Indian household finance management.</p>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap", marginTop: "28px" }}>
+            <Link to="/register" className="landing-btn landing-btn--primary">
+              Create Free Account <IconArrow />
+            </Link>
+            <Link to="/login" className="landing-btn landing-btn--ghost">
+              Already have an account?
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
+      {/* ── Footer ── */}
       <footer className="landing-footer">
         <div className="landing-footer__brand">
-          <img className="landing-nav__logo" src={logo} alt="Selvam" />
+          <img className="landing-nav__logo" src={logo} alt="Selvam" style={{ width: 32, height: 32 }} />
           <span>Selvam</span>
         </div>
         <p className="landing-footer__copy">
-          &copy; {new Date().getFullYear()} Selvam &middot; Built for Indian families
+          © {new Date().getFullYear()} Selvam · Built with ❤️ for Indian families ·{" "}
+          Amrita School of Computing, Coimbatore
+        </p>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.78rem", marginTop: "6px" }}>
+          Team: Amarthya Sujay · Sanjay A R · Sundar T
         </p>
       </footer>
     </div>

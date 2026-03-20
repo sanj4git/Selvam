@@ -1,6 +1,28 @@
 import { useEffect, useState } from "react";
 import { listAssets, addAsset, updateAsset, deleteAsset, triggerSync } from "../api/assets.js";
 
+const ASSET_META = {
+  Gold:        { emoji: "🥇", color: "#d4af37", bg: "rgba(212,175,55,0.12)" },
+  Cash:        { emoji: "💵", color: "#51cf66", bg: "rgba(81,207,102,0.12)" },
+  FD:          { emoji: "🏦", color: "#339af0", bg: "rgba(51,154,240,0.12)" },
+  Stock:       { emoji: "📈", color: "#ff922b", bg: "rgba(255,146,43,0.12)" },
+  MutualFund:  { emoji: "📊", color: "#cc5de8", bg: "rgba(204,93,232,0.12)" },
+  RealEstate:  { emoji: "🏠", color: "#20c997", bg: "rgba(32,201,151,0.12)" },
+  Crypto:      { emoji: "₿",  color: "#f59f00", bg: "rgba(245,159,0,0.12)"  },
+  Other:       { emoji: "💎", color: "#adb5bd", bg: "rgba(173,181,189,0.12)" },
+};
+
+function getAssetMeta(type) {
+  const key = Object.keys(ASSET_META).find(k => k.toLowerCase() === (type||'').toLowerCase());
+  return ASSET_META[key] || ASSET_META.Other;
+}
+
+function formatINR(n) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR", maximumFractionDigits: 0,
+  }).format(n);
+}
+
 const emptyForm = {
   assetType: "",
   name: "",
@@ -197,44 +219,57 @@ export default function Assets() {
       </div>
 
       <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <h3 style={{ margin: 0 }}>Assets List</h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <div>
+            <h3 style={{ margin: 0 }}>Assets Portfolio</h3>
+            {items.length > 0 && (
+              <p className="muted" style={{ marginTop: 4, fontSize: "0.85rem" }}>
+                Total: <strong style={{ color: "#d4af37" }}>{formatINR(items.reduce((s, a) => s + (a.value || 0), 0))}</strong>
+              </p>
+            )}
+          </div>
           <button
             className="btn btn-secondary"
             onClick={handleSync}
             disabled={loading}
-            style={{ fontSize: "0.85rem", padding: "6px 12px" }}
+            style={{ fontSize: "0.85rem", padding: "8px 14px" }}
           >
-            {loading ? "Syncing..." : "Sync Market Prices"}
+            {loading ? "Syncing…" : "⟳ Sync Prices"}
           </button>
         </div>
         {loading ? (
-          <div className="muted">Loading...</div>
+          <div className="muted">Loading…</div>
         ) : items.length === 0 ? (
-          <div className="muted">No assets yet</div>
+          <div className="exp-empty">
+            <span style={{ fontSize: "2.5rem" }}>🏦</span>
+            <p>No assets yet. Add your first asset!</p>
+          </div>
         ) : (
-          <div className="table">
-            <div className="table-row table-head">
-              <div>Type</div>
-              <div>Name</div>
-              <div>Value</div>
-              <div></div>
-            </div>
-            {items.map((item) => (
-              <div key={item._id} className="table-row">
-                <div>{item.assetType}</div>
-                <div>{item.name}</div>
-                <div>? {Number(item.value).toFixed(2)}</div>
-                <div className="row-actions">
-                  <button className="btn btn-link" onClick={() => startEdit(item)}>
-                    Edit
-                  </button>
-                  <button className="btn btn-link danger" onClick={() => handleDelete(item._id)}>
-                    Delete
-                  </button>
+          <div className="exp-list">
+            {items.map(item => {
+              const meta = getAssetMeta(item.assetType);
+              return (
+                <div key={item._id} className="exp-row">
+                  <div className="exp-row-icon" style={{ background: meta.bg, color: meta.color }}>
+                    {meta.emoji}
+                  </div>
+                  <div className="exp-row-info">
+                    <span className="exp-row-cat">{item.name}</span>
+                    <span className="exp-row-desc">{item.assetType}{item.isMarketLinked ? " · Market Linked" : ""}</span>
+                  </div>
+                  <div className="exp-row-right">
+                    <span className="exp-row-amount">{formatINR(item.value)}</span>
+                    {item.interestRate > 0 && (
+                      <span className="exp-row-date">{item.interestRate}% p.a.</span>
+                    )}
+                  </div>
+                  <div className="exp-row-actions">
+                    <button className="exp-action-btn" onClick={() => startEdit(item)} title="Edit">✏️</button>
+                    <button className="exp-action-btn exp-action-btn--danger" onClick={() => handleDelete(item._id)} title="Delete">🗑️</button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

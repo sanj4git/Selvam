@@ -1,0 +1,282 @@
+\documentclass[12pt,a4paper]{article}
+
+% ── Packages ────────────────────────────────────────────────────────────────
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{multicol}
+\usepackage{tcolorbox}
+
+% ── Colours ─────────────────────────────────────────────────────────────────
+\definecolor{royalblue}{RGB}{28, 58, 150}
+\definecolor{goldaccent}{RGB}{180, 145, 20}
+\definecolor{darkgray}{RGB}{70, 70, 70}
+\definecolor{lightblue}{RGB}{235, 241, 255}
+
+% ── Section Styling ──────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\large\bfseries\color{royalblue}}{}{0em}{}[\color{goldaccent}\titlerule]
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{royalblue}}{}{0em}{}
+\titlespacing{\section}{0pt}{14pt}{6pt}
+\titlespacing{\subsection}{0pt}{10pt}{4pt}
+
+% ── Header / Footer ──────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darkgray}\textit{Selvam --- Unified Family Finance \& Wealth Management Platform}}
+\fancyhead[R]{\small\color{darkgray}\textit{Amrita School of Computing}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ── Hyperref ─────────────────────────────────────────────────────────────────
+\hypersetup{colorlinks=true, linkcolor=royalblue, urlcolor=royalblue}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+\setstretch{1.2}
+
+% ═══════════════════════════════════════════════════════════════════════════
+%  TITLE PAGE
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+
+% ── College Logo ─────────────────────────────────────────────────────────────
+% Upload your college logo as: college_logo.png
+\includegraphics[height=3cm]{college_logo.png}\\[0.4cm]
+
+{\Large\bfseries Amrita School of Computing, Coimbatore}\\[0.15cm]
+{\normalsize Amrita Vishwa Vidyapeetham}\\[0.1cm]
+{\normalsize Department of Computer Science and Engineering}\\[0.1cm]
+{\small\textbf{Course:} 23CSE461 --- Full Stack Frameworks
+\quad\textbf{Faculty:} Dr\ T\ Senthil Kumar}
+
+\vspace{0.7cm}
+\noindent\textcolor{goldaccent}{\rule{\linewidth}{1.2pt}}
+\vspace{0.5cm}
+
+% ── Product Logo ─────────────────────────────────────────────────────────────
+% Upload your product logo as: logo.jpeg
+\includegraphics[height=3.5cm]{logo.jpeg}\\[0.5cm]
+
+{\Huge\bfseries\color{royalblue} Selvam}\\[0.35cm]
+{\large\color{darkgray} Unified Family Finance \& Wealth Management Platform}\\[0.15cm]
+{\normalsize\itshape A Full-Stack MERN Web Application}
+
+\vspace{0.5cm}
+\noindent\textcolor{goldaccent}{\rule{\linewidth}{1.2pt}}
+\vspace{0.8cm}
+
+{\large\bfseries Project Report}\\[0.1cm]
+{\normalsize Academic Year: 2025--2026 \quad|\quad March 2026}
+
+\vspace{1cm}
+
+% ── Team Table ───────────────────────────────────────────────────────────────
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{}c >{}c >{}c}
+\toprule
+\textbf{Name} & \textbf{Roll Number} & \textbf{Contribution} \\
+\midrule
+Amarthya Sujay & CB.SC.U4CSE23003 & Full Stack Development \\
+Sanjay A R     & CB.SC.U4CSE23052 & Full Stack Development \\
+Sundar T       & CB.SC.U4CSE23348 & Full Stack Development \\
+\bottomrule
+\end{tabular}
+
+\vfill
+
+\end{titlepage}
+
+% ═══════════════════════════════════════════════════════════════════════════
+%  BODY
+% ═══════════════════════════════════════════════════════════════════════════
+
+% ── Abstract ─────────────────────────────────────────────────────────────────
+\begin{tcolorbox}[colback=lightblue, colframe=royalblue, title={\bfseries Abstract}, fonttitle=\color{white}]
+\textbf{Selvam} is a full-stack, MERN-based personal and family finance management platform tailored for Indian households. The platform unifies expense tracking, asset and liability management, real-time financial analytics, and an AI-powered chatbot into a single cohesive system. Built with React 18, Express.js 5, MongoDB, and the Google Gemini API, key contributions include a holistic financial dashboard, family role management, automated market price updates via scheduled jobs, and a natural-language AI financial assistant. The project demonstrates the application of modern full-stack development practices to a socially relevant and technically challenging domain.
+\end{tcolorbox}
+
+\vspace{0.3cm}
+
+% ── 1. Introduction ──────────────────────────────────────────────────────────
+\section{Introduction}
+
+Managing household finances in India involves tracking diverse financial instruments — daily expenses, gold holdings, fixed deposits, mutual funds, equity investments, real estate, and recurring loan obligations. Most families rely on a scattered collection of mobile apps, spreadsheets, and banking portals, each providing only a partial view of their financial position.
+
+\textbf{Selvam} (meaning \textit{wealth} in Tamil) addresses this problem by offering a centralised, intelligent web platform that consolidates all financial data into a single source of truth. The platform is designed around three core principles: \textbf{complete visibility} over all income and outflows, \textbf{actionable insight} through AI-driven analysis and interactive charts, and \textbf{family-level collaboration} with role-based access control.
+
+% ── 2. Problem Statement ─────────────────────────────────────────────────────
+\section{Problem Statement}
+
+Existing personal finance applications exhibit critical shortcomings when applied to the Indian household context:
+
+\begin{itemize}[noitemsep, leftmargin=*]
+  \item Expense trackers do not incorporate assets, investments, or liabilities.
+  \item Investment platforms ignore daily spending and recurring obligations.
+  \item No India-centric tool natively supports instruments such as gold, Sovereign Gold Bonds, chit funds, or mutual fund NAVs.
+  \item Collaborative household finance management (Head of Family model) is absent from mainstream tools.
+  \item Fragmented tools provide no unified view of true household net worth.
+\end{itemize}
+
+The absence of an integrated, India-focused, family-oriented finance platform creates a gap that Selvam is designed to fill.
+
+% ── 3. System Architecture ───────────────────────────────────────────────────
+\section{System Architecture \& Technology Stack}
+
+The application follows a standard three-tier client-server architecture:
+
+\begin{itemize}[noitemsep, leftmargin=*]
+  \item \textbf{Presentation Layer} --- React 18 Single Page Application, served via Vite, communicates with the backend via Axios with JWT interceptors.
+  \item \textbf{Application Layer} --- Express.js 5 REST API with modular controllers, middlewares (authentication, validation, CORS), and Socket.io for real-time communication.
+  \item \textbf{Data Layer} --- MongoDB cloud database accessed via Mongoose ODM, storing Users, Expenses, Assets, and Liabilities.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  % Upload your architecture diagram as: architecture_diagram.png
+  \includegraphics[width=0.9\linewidth]{architecture_diagram.png}
+  \caption{High-level system architecture of the Selvam platform}
+  \label{fig:arch}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{>{\bfseries}l X}
+\toprule
+Layer & Technologies \\
+\midrule
+Frontend  & React 18, Vite, React Router 6, Axios, Recharts, React Icons, React Markdown \\
+Backend   & Node.js, Express.js 5, JWT, bcryptjs, express-validator, node-cron, Socket.io \\
+Database  & MongoDB Atlas with Mongoose ODM \\
+AI / APIs & Google Gemini API (\texttt{@google/generative-ai}), Market Price APIs \\
+Styling   & Vanilla CSS --- Glassmorphism, Royal Blue \& Gold palette, Inter/Poppins fonts \\
+\bottomrule
+\end{tabularx}
+\caption{Technology stack summary}
+\end{table}
+
+% ── 4. Features ──────────────────────────────────────────────────────────────
+\section{Features \& Implementation}
+
+\subsection{User Authentication \& Security}
+The system implements a robust, stateless authentication mechanism using JSON Web Tokens (JWT). User passwords are salted and hashed with \texttt{bcryptjs} prior to storage. All sensitive API routes are protected by a server-side auth middleware. On the frontend, Axios interceptors automatically attach the bearer token to every outgoing request and redirect unauthenticated users to the login page. Server-side input validation is enforced on all write endpoints using \texttt{express-validator}. API keys, database URIs, and JWT secrets are managed through environment variables, excluded from version control via \texttt{.gitignore}.
+
+\subsection{Expense Management}
+The expense module provides full CRUD functionality, enabling users to record, view, update, and delete financial transactions. Each entry captures the amount (with decimal precision), a predefined category (Food, Transport, Rent, Utilities, Shopping, Health, Entertainment, Other), date, and an optional description. The expense history is rendered in a sortable, paginated table with inline Edit and Delete controls. All data is user-scoped, ensuring strict data isolation between accounts.
+
+\subsection{Asset \& Liability Tracking}
+The asset module supports a comprehensive range of Indian financial instruments: Cash, Gold, Fixed Deposits, Mutual Funds, Stocks, Cryptocurrency, and Real Estate. Each entry records both the original purchase value and the current market value, enabling automatic profit/loss and portfolio allocation computation. The liability module tracks home loans, education loans, personal loans, and credit card debt, storing outstanding balances, EMI schedules, and due dates, which are used to compute net worth impact and generate upcoming obligation alerts.
+
+\subsection{Financial Dashboard \& Net Worth Engine}
+A dedicated backend analytics engine aggregates all financial data to compute Total Assets, Total Liabilities, Monthly Cash Flow, and Net Worth. This summary is exposed via a REST endpoint consumed by the frontend Dashboard. The dashboard presents a real-time financial snapshot alongside interactive Recharts visualisations (detailed in Section~\ref{sec:viz}).
+
+\subsection{AI-Powered Chatbot}
+An embedded conversational assistant, powered by the \textbf{Google Gemini API}, is integrated into the platform. Users can query the chatbot in natural language — for example, \textit{``What category did I overspend in this month?''} or \textit{``How should I reduce my liabilities?''} The chatbot receives the user's current financial context alongside the query, enabling personalised and actionable responses. Responses are rendered with Markdown formatting inside the chat interface using \texttt{react-markdown}.
+
+
+\subsection{Family Management \& Shared Access}
+The platform implements a ``Head of Family'' hierarchy. A primary account holder can invite additional family members, who are granted scoped access to the shared household financial data. The Head of Family has full visibility — including who added which expense and when — while standard members can add and manage their own records. This mirrors the financial responsibility structure of Indian households.
+
+\subsection{Automated Market Price Updates}
+Backend workers, implemented using \textbf{node-cron}, run on a configurable schedule (every 24 hours) to refresh market-linked asset values. Integrated external APIs update live Gold prices, Mutual Fund NAVs, and Cryptocurrency rates, ensuring that the net worth calculation remains current without manual intervention.
+
+% ── 5. Visualizations ────────────────────────────────────────────────────────
+\section{Data Visualisations}
+\label{sec:viz}
+
+The frontend Dashboard leverages the \textbf{Recharts} library to render the following interactive charts, each consuming data from the backend analytics API:
+
+\begin{itemize}[noitemsep, leftmargin=*]
+  \item \textbf{Spending Breakdown (Pie Chart)} --- Displays expense distribution across all categories for the current month, colour-coded for quick identification of high-spend areas.
+  \item \textbf{Net Worth Trend (Line Chart)} --- Plots the user's net worth over a 12-month rolling window, highlighting growth or regression over time.
+  \item \textbf{Monthly Expense Comparison (Bar Chart)} --- Side-by-side monthly totals to visualise spending trends and seasonal patterns.
+  \item \textbf{Asset Allocation (Donut Chart)} --- Breaks down the portfolio by asset class (Gold, Stocks, FD, Crypto, Real Estate, etc.) to guide rebalancing decisions.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.475\linewidth}
+    % Upload as: screenshot_dashboard.png
+    \includegraphics[width=\linewidth, height=5.5cm, keepaspectratio]{screenshot_dashboard.png}
+    \caption{Financial Dashboard overview}
+    \label{fig:dashboard}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.475\linewidth}
+    % Upload as: screenshot_expenses.png
+    \includegraphics[width=\linewidth, height=5.5cm, keepaspectratio]{screenshot_expenses.png}
+    \caption{Expense management page}
+    \label{fig:expenses}
+  \end{subfigure}
+  \caption{Key application screens}
+\end{figure}
+
+% ── 6. Novelty ───────────────────────────────────────────────────────────────
+\section{Novelty \& Significance}
+
+The novelty of the Selvam platform lies in the combination of the following contributions, none of which are addressed holistically by existing tools:
+
+\begin{enumerate}[leftmargin=*, noitemsep, label=\textbf{\arabic*.}]
+  \item \textbf{Unified Financial Ledger for Indian Households} --- Unlike generic expense trackers, Selvam natively models India-specific instruments (Gold by gram, Mutual Fund NAV, Chit Funds) alongside international asset classes.
+  \item \textbf{AI-Contextualised Financial Advice} --- The Gemini-powered chatbot is provided with the user's live financial data at query time, enabling personalised, context-aware responses rather than generic financial tips.
+  \item \textbf{Family-Oriented Architecture} --- The ``Head of Family'' role model mirrors actual household financial decision-making structures, an aspect absent from all major personal finance tools.
+  \item \textbf{Automated Market Synchronisation} --- The \texttt{node-cron}-driven background refresh of live Gold, MF NAV, and Crypto prices eliminates the manual re-entry burden that burdens users of conventional asset trackers.
+\end{enumerate}
+
+% ── 7. Database Design ───────────────────────────────────────────────────────
+\section{Database Design}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{>{\bfseries}l X}
+\toprule
+Collection & Key Fields \\
+\midrule
+Users       & name, email, passwordHash, role, familyId, createdAt \\
+Expenses    & userId, amount, category, date, description, merchant, paymentMethod, tags \\
+Assets      & userId, type, name, purchaseValue, currentValue, purchaseDate, quantity \\
+Liabilities & userId, type, name, outstandingBalance, emiAmount, dueDate, interestRate \\
+\bottomrule
+\end{tabularx}
+\caption{MongoDB collections and primary fields}
+\end{table}
+
+% ── 8. Conclusion ─────────────────────────────────────────────────────────────
+\section{Conclusion}
+
+Selvam successfully delivers a production-grade, full-stack web application that addresses a genuine gap in personal and family finance management for Indian households. The platform goes beyond conventional expense tracking by integrating real-time asset valuation, AI-driven financial advice, family collaboration, and automated market synchronisation within a cohesive, modern interface.
+
+The project demonstrates proficiency in the complete MERN stack, RESTful API design, AI API integration, scheduled background processing, and modern frontend development with React and Recharts. It is a strong foundation for a production consumer application with significant scope for extension into mobile platforms and deeper financial intelligence.
+
+% ── References ───────────────────────────────────────────────────────────────
+\section*{References}
+\begin{enumerate}[leftmargin=*, label={[\arabic*]}, noitemsep]
+  \item MongoDB Documentation. \url{https://www.mongodb.com/docs/}
+  \item Express.js Guide. \url{https://expressjs.com/}
+  \item React Documentation. \url{https://react.dev/}
+  \item Node.js Documentation. \url{https://nodejs.org/docs/}
+  \item Recharts Library. \url{https://recharts.org/}
+  \item Google Generative AI SDK. \url{https://ai.google.dev/}
+  \item Socket.io Documentation. \url{https://socket.io/docs/}
+  \item JSON Web Tokens. \url{https://jwt.io/}
+\end{enumerate}
+
+\end{document}
